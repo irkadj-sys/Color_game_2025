@@ -1,0 +1,60 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: Color - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating command line "rc.exe /l 0x409 /fo"Debug/Color.res" /d "_DEBUG" /d "_AFXDLL" "C:\C_Prog\Color\Color.rc"" 
+Creating temporary file "c:\windows\TEMP\RSPF205.TMP" with contents
+[
+/nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /FR"Debug/" /Fp"Debug/Color.pch" /Yu"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"C:\C_Prog\Color\Color.cpp"
+"C:\C_Prog\Color\ColorDoc.cpp"
+"C:\C_Prog\Color\ColorView.cpp"
+"C:\C_Prog\Color\MainFrm.cpp"
+"C:\C_Prog\Color\OptDlg.cpp"
+]
+Creating command line "cl.exe @c:\windows\TEMP\RSPF205.TMP" 
+Creating temporary file "c:\windows\TEMP\RSPF206.TMP" with contents
+[
+/nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /FR"Debug/" /Fp"Debug/Color.pch" /Yc"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"C:\C_Prog\Color\StdAfx.cpp"
+]
+Creating command line "cl.exe @c:\windows\TEMP\RSPF206.TMP" 
+Creating temporary file "c:\windows\TEMP\RSPF207.TMP" with contents
+[
+/nologo /subsystem:windows /incremental:yes /pdb:"Debug/Color.pdb" /debug /machine:I386 /out:"Debug/Color.exe" /pdbtype:sept 
+.\Debug\Color.obj
+.\Debug\ColorDoc.obj
+.\Debug\ColorView.obj
+.\Debug\MainFrm.obj
+.\Debug\OptDlg.obj
+.\Debug\StdAfx.obj
+.\Debug\Color.res
+]
+Creating command line "link.exe @c:\windows\TEMP\RSPF207.TMP"
+<h3>Output Window</h3>
+Compiling resources...
+Compiling...
+StdAfx.cpp
+Compiling...
+Color.cpp
+ColorDoc.cpp
+ColorView.cpp
+MainFrm.cpp
+OptDlg.cpp
+Generating Code...
+Linking...
+Creating command line "bscmake.exe /nologo /o"Debug/Color.bsc"  .\Debug\StdAfx.sbr .\Debug\Color.sbr .\Debug\ColorDoc.sbr .\Debug\ColorView.sbr .\Debug\MainFrm.sbr .\Debug\OptDlg.sbr"
+Creating browse info file...
+<h3>Output Window</h3>
+
+
+
+<h3>Results</h3>
+Color.exe - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>
