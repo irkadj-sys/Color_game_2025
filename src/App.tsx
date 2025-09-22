@@ -3,7 +3,7 @@ import { GameCanvas } from './components/GameCanvas';
 import './App.css';
 
 function App() {
-    const [isHumanOpponent, setIsHumanOpponent] = useState<boolean>(true);
+    const [isHumanOpponent, setIsHumanOpponent] = useState<boolean>(false);
 
     return (
         <div className="App">
