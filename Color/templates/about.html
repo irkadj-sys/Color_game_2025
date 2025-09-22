@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About {{ app_title }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif;
+            background: #c0c0c0;
+            color: #000;
+            font-size: 8pt;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Windows 95/98 style dialog */
+        .dialog {
+            background: #c0c0c0;
+            border: 2px outset #c0c0c0;
+            box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            width: 235px;
+            height: 55px;
+            position: relative;
+        }
+
+        .dialog-title {
+            background: linear-gradient(to right, #000080, #1084d0);
+            color: white;
+            padding: 2px 4px;
+            font-weight: bold;
+            font-size: 8pt;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .title-bar-controls {
+            display: flex;
+            gap: 1px;
+        }
+
+        .title-bar-button {
+            width: 12px;
+            height: 12px;
+            background: #c0c0c0;
+            border: 1px outset #c0c0c0;
+            font-size: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .title-bar-button:hover {
+            background: #d4d0c8;
+        }
+
+        .dialog-content {
+            padding: 8px;
+            height: calc(100% - 20px);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Icon */
+        .icon {
+            width: 21px;
+            height: 20px;
+            background: linear-gradient(to right, #000080, #1084d0);
+            border: 1px solid #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        /* Text content */
+        .text-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .text-line {
+            font-size: 8pt;
+            line-height: 1.2;
+        }
+
+        /* OK button */
+        .ok-button {
+            padding: 2px 8px;
+            border: 2px outset #c0c0c0;
+            background: #c0c0c0;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 8pt;
+            font-weight: bold;
+            min-width: 40px;
+            height: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            right: 8px;
+            top: 8px;
+        }
+
+        .ok-button:hover {
+            background: #d4d0c8;
+        }
+
+        .ok-button:active {
+            border: 2px inset #c0c0c0;
+        }
+    </style>
+</head>
+<body>
+    <div class="dialog">
+        <div class="dialog-title">
+            <span>About {{ app_title }}</span>
+            <div class="title-bar-controls">
+                <div class="title-bar-button">×</div>
+            </div>
+        </div>
+
+        <div class="dialog-content">
+            <div class="icon">C</div>
+            
+            <div class="text-content">
+                <div class="text-line">{{ app_title }} Version 1.0</div>
+                <div class="text-line">Copyright (C) {{ copyright_year }}</div>
+            </div>
+
+            <button class="ok-button" onclick="okClicked()">OK</button>
+        </div>
+    </div>
+
+    <script>
+        function okClicked() {
+            window.close();
+        }
+
+        // Handle escape key and enter key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' || e.key === 'Enter') {
+                okClicked();
+            }
+        });
+
+        // Handle window close button
+        document.querySelector('.title-bar-button').addEventListener('click', function() {
+            okClicked();
+        });
+    </script>
+</body>
+</html> 

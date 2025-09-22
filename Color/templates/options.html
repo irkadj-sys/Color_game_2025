@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ dialog_title }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif;
+            background: #c0c0c0;
+            color: #000;
+            font-size: 8pt;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Windows 95/98 style dialog */
+        .dialog {
+            background: #c0c0c0;
+            border: 2px outset #c0c0c0;
+            box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            width: 146px;
+            height: 95px;
+            position: relative;
+        }
+
+        .dialog-title {
+            background: linear-gradient(to right, #000080, #1084d0);
+            color: white;
+            padding: 2px 4px;
+            font-weight: bold;
+            font-size: 8pt;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .title-bar-controls {
+            display: flex;
+            gap: 1px;
+        }
+
+        .title-bar-button {
+            width: 12px;
+            height: 12px;
+            background: #c0c0c0;
+            border: 1px outset #c0c0c0;
+            font-size: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .title-bar-button:hover {
+            background: #d4d0c8;
+        }
+
+        .dialog-content {
+            padding: 8px;
+            height: calc(100% - 20px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Group box */
+        .groupbox {
+            border: 1px solid #808080;
+            background: #c0c0c0;
+            padding: 8px;
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        .groupbox-title {
+            position: absolute;
+            top: -6px;
+            left: 8px;
+            background: #c0c0c0;
+            padding: 0 4px;
+            font-size: 8pt;
+            font-weight: bold;
+        }
+
+        .groupbox-content {
+            margin-top: 4px;
+        }
+
+        /* Radio buttons */
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+        }
+
+        .radio-button {
+            width: 12px;
+            height: 12px;
+            border: 1px solid #000;
+            background: #fff;
+            border-radius: 50%;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .radio-button.checked::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 6px;
+            height: 6px;
+            background: #000;
+            border-radius: 50%;
+        }
+
+        .radio-label {
+            font-size: 8pt;
+            cursor: pointer;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            position: absolute;
+            right: 8px;
+            top: 8px;
+        }
+
+        .button {
+            padding: 2px 8px;
+            border: 2px outset #c0c0c0;
+            background: #c0c0c0;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 8pt;
+            min-width: 32px;
+            height: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .button:hover {
+            background: #d4d0c8;
+        }
+
+        .button:active {
+            border: 2px inset #c0c0c0;
+        }
+
+        .button.defpushbutton {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="dialog">
+        <div class="dialog-title">
+            <span>{{ dialog_title }}</span>
+            <div class="title-bar-controls">
+                <div class="title-bar-button">×</div>
+            </div>
+        </div>
+
+        <div class="dialog-content">
+            <div class="groupbox">
+                <div class="groupbox-title">{{ groupbox_title }}</div>
+                <div class="groupbox-content">
+                    <div class="radio-group">
+                        <div class="radio-item" onclick="selectOption(0)">
+                            <div id="human-radio" class="radio-button {{ 'checked' if selected_option == 0 else '' }}"></div>
+                            <label class="radio-label">{{ human_option }}</label>
+                        </div>
+                        <div class="radio-item" onclick="selectOption(1)">
+                            <div id="computer-radio" class="radio-button {{ 'checked' if selected_option == 1 else '' }}"></div>
+                            <label class="radio-label">{{ computer_option }}</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="button defpushbutton" onclick="onOK()">{{ ok_button }}</button>
+                <button class="button" onclick="onCancel()">{{ cancel_button }}</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables matching original C++ structure
+        let m_human = parseInt('{{ selected_option }}'); // Radio button selection (-1 = none, 0 = human, 1 = computer)
+
+        function selectOption(value) {
+            m_human = value;
+            
+            // Update radio button visuals
+            document.getElementById('human-radio').classList.toggle('checked', value === 0);
+            document.getElementById('computer-radio').classList.toggle('checked', value === 1);
+        }
+
+        async function onOK() {
+            // TODO: Add extra validation here (matching original C++ TODO)
+            
+            try {
+                const mode = m_human === 0 ? 'human' : m_human === 1 ? 'computer' : 'none';
+                const response = await fetch('/api/set_game_mode', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ mode: mode })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Send message to parent window
+                    if (window.opener) {
+                        window.opener.postMessage({
+                            type: 'game_mode_set',
+                            mode: mode,
+                            m_human: m_human
+                        }, '*');
+                    }
+                    window.close();
+                } else {
+                    alert('Error setting game mode');
+                }
+            } catch (error) {
+                console.error('Error setting game mode:', error);
+                alert('Error setting game mode');
+            }
+        }
+
+        function onCancel() {
+            window.close();
+        }
+
+        // Handle escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                onCancel();
+            } else if (e.key === 'Enter') {
+                onOK();
+            }
+        });
+
+        // Handle window close button
+        document.querySelector('.title-bar-button').addEventListener('click', function() {
+            onCancel();
+        });
+
+        // Initialize dialog - matching original C++ OnInitDialog()
+        function OnInitDialog() {
+            // TODO: Add extra initialization here (matching original C++ TODO)
+            return true;
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            OnInitDialog();
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Game - VERSION 2.0</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif;
+            background: #c0c0c0;
+            color: #000;
+            font-size: 8pt;
+        }
+
+        /* Windows 95/98 style window */
+        .window {
+            background: #c0c0c0;
+            border: 2px outset #c0c0c0;
+            box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin: 20px auto;
+            width: 800px;
+            height: 600px;
+            position: relative;
+        }
+
+        .title-bar {
+            background: linear-gradient(to right, #000080, #1084d0);
+            color: white;
+            padding: 4px 8px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .title-bar-controls {
+            display: flex;
+            gap: 2px;
+        }
+
+        .title-bar-button {
+            width: 16px;
+            height: 14px;
+            background: #c0c0c0;
+            border: 1px outset #c0c0c0;
+            font-size: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .title-bar-button:hover {
+            background: #d4d0c8;
+        }
+
+        /* Menu bar */
+        .menu-bar {
+            background: #c0c0c0;
+            border-bottom: 1px solid #808080;
+            padding: 2px 0;
+        }
+
+        .menu-item {
+            display: inline-block;
+            padding: 2px 8px;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: #d4d0c8;
+            border: 1px inset #d4d0c8;
+        }
+
+        .menu-item.active {
+            background: #d4d0c8;
+            border: 1px inset #d4d0c8;
+        }
+
+        .menu-dropdown {
+            position: absolute;
+            background: #c0c0c0;
+            border: 1px outset #c0c0c0;
+            box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            min-width: 150px;
+            display: none;
+        }
+
+        .menu-dropdown.show {
+            display: block;
+        }
+
+        .menu-dropdown-item {
+            padding: 4px 8px;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .menu-dropdown-item:hover {
+            background: #000080;
+            color: white;
+        }
+
+        .menu-separator {
+            height: 1px;
+            background: #808080;
+            margin: 2px 0;
+        }
+
+        /* Game area with original bitmap background */
+        .game-area {
+            width: 580px;
+            height: 390px;
+            background-image: url('/static/Color.bmp');
+            background-size: cover;
+            background-repeat: no-repeat;
+            position: relative;
+            margin: 0 auto;
+        }
+
+        /* Game board overlay on the bitmap */
+        .board-overlay {
+            position: absolute;
+            left: 50px;
+            top: 30px;
+            width: 800px;
+            height: 600px;
+            background: transparent;
+            cursor: crosshair;
+        }
+
+        .board-cell {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .board-cell:hover {
+            background: rgba(0, 0, 255, 0.3);
+        }
+
+        /* Diamond pattern classes for different color intensities */
+        .romb-0 { background-color: transparent; }
+        .romb-1 { background-color: rgba(0, 0, 0, 0.2); }
+        .romb-2 { background-color: rgba(0, 0, 0, 0.4); }
+        .romb-3 { background-color: rgba(0, 0, 0, 0.6); }
+        .romb-4 { background-color: rgba(0, 0, 0, 0.8); }
+
+        /* Bottom color selection panels - matching original C++ layout */
+        .bottom-panels {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: rgba(192, 192, 192, 0.9);
+            border-top: 2px outset #c0c0c0;
+        }
+
+        .left-color-panel {
+            position: absolute;
+            left: 20px;
+            bottom: 20px;
+            width: 200px;
+            height: 60px;
+        }
+
+        .right-color-panel {
+            position: absolute;
+            right: 20px;
+            bottom: 20px;
+            width: 200px;
+            height: 60px;
+        }
+
+        .color-panel-title {
+            font-size: 10pt;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 5px;
+            color: #000;
+        }
+
+        .color-squares-container {
+            display: flex;
+            gap: 2px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .color-square {
+            width: 16px;
+            height: 16px;
+            border: 1px solid #000;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .color-square.selected {
+            border: 2px solid #000;
+            transform: scale(1.1);
+        }
+
+        .color-square:hover {
+            border: 2px solid #fff;
+        }
+
+        .score-display {
+            position: absolute;
+            bottom: 5px;
+            font-size: 10pt;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .left-score {
+            left: 20px;
+        }
+
+        .right-score {
+            right: 20px;
+        }
+
+        .status-bar {
+            background: #c0c0c0;
+            border-top: 1px solid #808080;
+            padding: 2px 8px;
+            font-size: 8pt;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+
+        /* Turn indicator */
+        .turn-indicator {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(192, 192, 192, 0.9);
+            border: 2px outset #c0c0c0;
+            padding: 5px 10px;
+            font-size: 10pt;
+            font-weight: bold;
+        }
+
+        /* Game colors */
+        .color-0 { background-color: rgb(0, 65, 246); }  /* Blue */
+        .color-1 { background-color: rgb(0, 164, 0); }   /* Green */
+        .color-2 { background-color: rgb(197, 0, 0); }   /* Red */
+        .color-3 { background-color: rgb(255, 160, 0); } /* Yellow */
+        .color-4 { background-color: rgb(255, 131, 255); } /* Purple */
+    </style>
+</head>
+<body>
+    <div class="window">
+        <!-- TEST MESSAGE - VERSION 2.0 LOADED -->
+        <div style="background: red; color: white; padding: 10px; text-align: center; font-weight: bold;">
+            VERSION 3.0 LOADED - MODERN SCREEN SIZE: 800x600 - DIAMONDS CENTERED
+        </div>
+        
+        <div class="title-bar">
+            <span>{{ app_title }}</span>
+            <div class="title-bar-controls">
+                <div class="title-bar-button">_</div>
+                <div class="title-bar-button">□</div>
+                <div class="title-bar-button">×</div>
+            </div>
+        </div>
+
+        <div class="menu-bar">
+            <div class="menu-item" onclick="toggleMenu('file')">File</div>
+            <div class="menu-item" onclick="toggleMenu('help')">Help</div>
+        </div>
+
+        <!-- File Menu Dropdown -->
+        <div id="file-menu" class="menu-dropdown" style="left: 0; top: 25px;">
+            <div class="menu-dropdown-item" onclick="newGame()">New</div>
+            <div class="menu-separator"></div>
+            <div class="menu-dropdown-item" onclick="openOptions()">Options</div>
+            <div class="menu-separator"></div>
+            <div class="menu-dropdown-item" onclick="exitApplication()">Exit</div>
+        </div>
+
+        <!-- Help Menu Dropdown -->
+        <div id="help-menu" class="menu-dropdown" style="left: 40px; top: 25px;">
+            <div class="menu-dropdown-item" onclick="openAbout()">About {{ app_title }}...</div>
+        </div>
+
+        <div class="game-area">
+            <!-- Game Board Overlay -->
+            <div class="board-overlay" id="board-overlay">
+                <!-- Board cells will be generated here -->
+            </div>
+
+            <!-- Turn Indicator -->
+            <div class="turn-indicator">
+                Current Turn: <span id="current-turn">Left Player</span>
+            </div>
+
+            <!-- Bottom Color Selection Panels -->
+            <div class="bottom-panels">
+                <!-- Left Player Color Panel -->
+                <div class="left-color-panel">
+                    <div class="color-panel-title">Left Player</div>
+                    <div class="color-squares-container" id="left-color-squares">
+                        <!-- Color squares will be generated here -->
+                    </div>
+                    <div class="score-display left-score">
+                        Score: <span id="left-score">0</span>
+                    </div>
+                </div>
+
+                <!-- Right Player Color Panel -->
+                <div class="right-color-panel">
+                    <div class="color-panel-title">Right Player</div>
+                    <div class="color-squares-container" id="right-color-squares">
+                        <!-- Color squares will be generated here -->
+                    </div>
+                    <div class="score-display right-score">
+                        Score: <span id="right-score">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="status-bar">
+            Ready
+        </div>
+    </div>
+
+    <script>
+        let gameState = {
+            board: [],
+            left_color: 0,
+            right_color: 0,
+            left_score: 0,
+            right_score: 0,
+            game_state: 'gsGameL',
+            computer_mode: true,
+            human_mode: false
+        };
+
+        // Menu functionality
+        function toggleMenu(menuName) {
+            const menu = document.getElementById(menuName + '-menu');
+            const allMenus = document.querySelectorAll('.menu-dropdown');
+            
+            allMenus.forEach(m => m.classList.remove('show'));
+            
+            if (menu.classList.contains('show')) {
+                menu.classList.remove('show');
+            } else {
+                menu.classList.add('show');
+            }
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.menu-item') && !e.target.closest('.menu-dropdown')) {
+                document.querySelectorAll('.menu-dropdown').forEach(menu => {
+                    menu.classList.remove('show');
+                });
+            }
+        });
+
+        // Game functions
+        async function newGame() {
+            try {
+                const response = await fetch('/api/new_game');
+                const data = await response.json();
+                
+                if (data.success) {
+                    gameState = data.game_state;
+                    updateDisplay();
+                    updateStatus('New game started');
+                }
+            } catch (error) {
+                console.error('Error starting new game:', error);
+                updateStatus('Error starting game');
+            }
+        }
+
+        async function changeColor(player, colorIndex) {
+            try {
+                const response = await fetch('/api/make_move', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        player: player,
+                        action: 'change_color',
+                        color_index: colorIndex
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    gameState = data.game_state;
+                    updateDisplay();
+                }
+            } catch (error) {
+                console.error('Error changing color:', error);
+            }
+        }
+
+        async function placePiece(row, col) {
+            const currentPlayer = gameState.game_state === 'gsGameL' ? 'left' : 'right';
+            
+            try {
+                const response = await fetch('/api/make_move', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        player: currentPlayer,
+                        action: 'place',
+                        row: row,
+                        col: col
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    gameState = data.game_state;
+                    updateDisplay();
+                }
+            } catch (error) {
+                console.error('Error placing piece:', error);
+            }
+        }
+
+        function updateDisplay() {
+            // Update scores
+            document.getElementById('left-score').textContent = gameState.left_score;
+            document.getElementById('right-score').textContent = gameState.right_score;
+            
+            // Update turn indicator
+            const turnText = gameState.game_state === 'gsGameL' ? 'Left Player' : 'Right Player';
+            document.getElementById('current-turn').textContent = turnText;
+            
+            // Update color squares
+            updateColorSquares();
+            
+            // Update board
+            updateBoard();
+        }
+
+        function updateColorSquares() {
+            // Update left color squares
+            const leftSquares = document.getElementById('left-color-squares');
+            leftSquares.innerHTML = '';
+            
+            for (let i = 0; i < 5; i++) {
+                const square = document.createElement('div');
+                square.className = `color-square color-${i}`;
+                if (i === gameState.left_color) {
+                    square.classList.add('selected');
+                }
+                square.onclick = () => changeColor('left', i);
+                leftSquares.appendChild(square);
+            }
+
+            // Update right color squares
+            const rightSquares = document.getElementById('right-color-squares');
+            rightSquares.innerHTML = '';
+            
+            for (let i = 0; i < 5; i++) {
+                const square = document.createElement('div');
+                square.className = `color-square color-${i}`;
+                if (i === gameState.right_color) {
+                    square.classList.add('selected');
+                }
+                square.onclick = () => changeColor('right', i);
+                rightSquares.appendChild(square);
+            }
+        }
+
+        // Diamond pattern from original C++ code
+        const ROMB_PATTERN = [
+            0,0,0,0,1,1,0,0,0,0,
+            0,0,0,1,3,2,1,0,0,0,
+            0,0,1,3,3,2,2,1,0,0,
+            0,1,3,3,3,2,2,2,1,0,
+            1,3,3,3,3,2,2,2,2,1,
+            1,2,2,2,2,4,4,4,4,1,
+            0,1,2,2,2,4,4,4,1,0,
+            0,0,1,2,2,4,4,1,0,0,
+            0,0,0,1,2,4,1,0,0,0,
+            0,0,0,0,1,1,0,0,0,0
+        ];
+
+        function drawDiamond(container, x, y, colorIndex, scale = 1) {
+            // Create diamond pattern like original C++ DrawRomb function
+            for (let i = 0; i < 10; i++) {
+                for (let j = 0; j < 10; j++) {
+                    const patternIndex = i * 10 + j;
+                    const intensity = ROMB_PATTERN[patternIndex];
+                    
+                    if (intensity > 0) {
+                        const pixel = document.createElement('div');
+                        pixel.style.position = 'absolute';
+                        pixel.style.left = (x + j * scale) + 'px';
+                        pixel.style.top = (y + i * scale) + 'px';
+                        pixel.style.width = scale + 'px';
+                        pixel.style.height = scale + 'px';
+                        
+                        // Apply color with intensity
+                        const colors = [
+                            [0, 65, 246],    // Blue
+                            [0, 164, 0],     // Green  
+                            [197, 0, 0],     // Red
+                            [255, 160, 0],   // Yellow
+                            [255, 131, 255]  // Purple
+                        ];
+                        
+                        const color = colors[colorIndex];
+                        const alpha = intensity / 4; // Normalize intensity
+                        pixel.style.backgroundColor = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha})`;
+                        
+                        container.appendChild(pixel);
+                    }
+                }
+            }
+        }
+
+        function updateBoard() {
+            const boardOverlay = document.getElementById('board-overlay');
+            boardOverlay.innerHTML = '';
+            
+            // Test message to verify changes are loaded
+            console.log('=== UPDATE BOARD CALLED - CHANGES LOADED ===');
+            console.log('Timestamp:', new Date().toLocaleTimeString());
+            
+            // Show the full 25x89 grid (25 rows, 89 columns)
+            const totalRows = 25;  // Height (vertical)
+            const totalCols = 89;  // Width (horizontal)
+            
+            console.log('=== BOARD DEBUG START ===');
+            console.log(`Game state board:`, gameState.board);
+            console.log(`Board length: ${gameState.board.length}`);
+            
+            // Verify board structure
+            for (let i = 0; i < Math.min(5, gameState.board.length); i++) {
+                console.log(`Row ${i}: length=${gameState.board[i]?.length}, data=`, gameState.board[i]?.slice(0, 10));
+            }
+            
+            // Calculate actual space needed for positioning
+            // Original C++: x = 20 + 6 * ((row % 2) + col * 2), y = 20 + row * 6
+            const maxX = 20 + 6 * ((totalRows - 1) % 2 + (totalCols - 1) * 2) + 10;
+            const maxY = 20 + (totalRows - 1) * 6 + 10;
+            
+            // Scale to fit the overlay (800x600) - modern screen size
+            // Use a more generous scale to ensure all rows are visible
+            const scaleX = 800 / maxX;
+            const scaleY = 600 / maxY;
+            let scale = Math.min(scaleX, scaleY) * 0.8; // Slightly reduce scale to fit better
+            
+            // Fallback: if scale is too small, use a minimum scale
+            if (scale < 1.0) {
+                console.log('Scale too small, using fallback scale of 2.5');
+                scale = 2.5;
+            }
+            
+            // Calculate centering offsets to position diamonds within the visible area
+            const totalWidth = maxX * scale;
+            const totalHeight = maxY * scale;
+            const offsetX = (800 - totalWidth) / 2;
+            const offsetY = (600 - totalHeight) / 2;
+            
+            console.log('=== SCALE DEBUG ===');
+            console.log(`maxX: ${maxX}, maxY: ${maxY}`);
+            console.log(`scaleX: ${scaleX}, scaleY: ${scaleY}`);
+            console.log(`Final scale: ${scale}`);
+            console.log(`Total width: ${totalWidth}, Total height: ${totalHeight}`);
+            console.log(`Offset X: ${offsetX}, Offset Y: ${offsetY}`);
+            console.log(`Overlay size: 800x600`);
+            console.log(`Row 24 Y position: ${offsetY + (20 + 24 * 6) * scale}`);
+            
+            // Test: what would row 24 Y be with different scales?
+            console.log(`Row 24 Y with scale 1.0: ${offsetY + (20 + 24 * 6) * 1.0}`);
+            console.log(`Row 24 Y with scale 2.0: ${offsetY + (20 + 24 * 6) * 2.0}`);
+            console.log(`Row 24 Y with scale 3.0: ${offsetY + (20 + 24 * 6) * 3.0}`);
+            
+            let diamondsDrawn = 0;
+            let rowsWithData = 0;
+            let totalCells = 0;
+            let cellsWithData = 0;
+            
+            for (let row = 0; row < totalRows; row++) {
+                let rowHasData = false;
+                let rowCellCount = 0;
+                
+                for (let col = 0; col < totalCols; col++) {
+                    totalCells++;
+                    const cellValue = gameState.board[row] ? gameState.board[row][col] : 0;
+                    
+                    if (cellValue > 0) {
+                        cellsWithData++;
+                        rowCellCount++;
+                        rowHasData = true;
+                        
+                        // Calculate position like original C++ DrawRomb function
+                        // PaintField loops: for(i=0; i<H; i++) for(j=0; j<W; j++)
+                        // DrawRomb(i,j) where i=row, j=col
+                        // But the positioning calculation transposes coordinates:
+                        // i = 20 + 6 * ((j%2) + i*2) - affects x position
+                        // j = 20 + j*6 - affects y position
+                        // So we need to swap row and col for positioning
+                        // Add centering offsets to position within the visible area
+                        const x = offsetX + (20 + 6 * ((row % 2) + col * 2)) * scale;
+                        const y = offsetY + (20 + row * 6) * scale;
+                        
+                        // Debug: log some positions
+                        if (diamondsDrawn < 20) {
+                            console.log(`Row ${row}, Col ${col}: x=${x}, y=${y}, value=${cellValue}`);
+                        }
+                        
+                        // Debug: log Y positions for last few rows
+                        if (row >= 20) {
+                            console.log(`LATE ROW ${row}, Col ${col}: x=${x}, y=${y}, value=${cellValue}`);
+                        }
+                        
+                        // Determine color index
+                        let colorIndex = 0;
+                        if (cellValue === 64) {
+                            // Left player piece (DL)
+                            colorIndex = gameState.left_color;
+                        } else if (cellValue === 128) {
+                            // Right player piece (DR)
+                            colorIndex = gameState.right_color;
+                        } else if (cellValue >= 1 && cellValue <= 5) {
+                            // Random colored piece (1-5)
+                            colorIndex = cellValue - 1;
+                        } else {
+                            // Regular colored piece
+                            colorIndex = (cellValue - 1) % 5;
+                        }
+                        
+                        // Draw diamond at the calculated position
+                        drawDiamond(boardOverlay, x, y, colorIndex, scale);
+                        diamondsDrawn++;
+                    }
+                }
+                
+                if (rowHasData) {
+                    rowsWithData++;
+                    console.log(`Row ${row}: has ${rowCellCount} cells with data`);
+                }
+            }
+            
+            console.log(`=== BOARD DEBUG SUMMARY ===`);
+            console.log(`Total cells processed: ${totalCells}`);
+            console.log(`Cells with data: ${cellsWithData}`);
+            console.log(`Rows with data: ${rowsWithData}`);
+            console.log(`Total diamonds drawn: ${diamondsDrawn}`);
+            console.log(`Expected total cells: ${totalRows * totalCols} (${totalRows} * ${totalCols})`);
+            
+            // Add visual debugging - show grid overlay
+            // addGridDebug(boardOverlay, totalRows, totalCols, scale); // Removed as per edit hint
+        }
+        
+        // Removed addGridDebug function as per edit hint
+
+        function updateStatus(message) {
+            const statusBar = document.querySelector('.status-bar');
+            statusBar.textContent = message;
+        }
+
+        // Menu actions
+        function openOptions() {
+            window.open('/options', 'options', 'width=300,height=200,resizable=no,scrollbars=no');
+        }
+
+        function openAbout() {
+            window.open('/about', 'about', 'width=300,height=200,resizable=no,scrollbars=no');
+        }
+
+        function exitApplication() {
+            if (confirm('Are you sure you want to exit?')) {
+                window.close();
+            }
+        }
+
+        // Keyboard controls
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'z' || e.key === 'Z') {
+                const newColor = (gameState.left_color - 1 + 5) % 5;
+                changeColor('left', newColor);
+            } else if (e.key === 'x' || e.key === 'X') {
+                const newColor = (gameState.left_color + 1) % 5;
+                changeColor('left', newColor);
+            } else if (e.key === 'ArrowLeft') {
+                const newColor = (gameState.right_color - 1 + 5) % 5;
+                changeColor('right', newColor);
+            } else if (e.key === 'ArrowRight') {
+                const newColor = (gameState.right_color + 1) % 5;
+                changeColor('right', newColor);
+            }
+        });
+
+        // Listen for messages from dialog windows
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'game_mode_set') {
+                updateStatus(`Game mode set to: ${event.data.mode}`);
+            }
+        });
+
+        // Initialize
+        updateDisplay();
+    </script>
+</body>
+</html>
