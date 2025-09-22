@@ -17,7 +17,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ isHumanOpponent }) => {
 
         // Clear canvas
         ctx.fillStyle = 'rgb(0,0,0)';
-        ctx.fillRect(0, 0, GAME_CONSTANTS.WIDTH, GAME_CONSTANTS.HEIGHT);
+        ctx.fillRect(0, 0, GAME_CONSTANTS.WIDTH, GAME_CONSTANTS.HEIGHT + 100);
 
         // Draw game field
         gameRef.current.drawField(ctx);
@@ -34,9 +34,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ isHumanOpponent }) => {
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        // Set canvas size to match original dimensions exactly
+        // Set canvas size to match original dimensions exactly, with extra space for color panels
         canvas.width = GAME_CONSTANTS.WIDTH;
-        canvas.height = GAME_CONSTANTS.HEIGHT;
+        canvas.height = GAME_CONSTANTS.HEIGHT + 100; // Add extra space for color panels
 
         // Initialize game
         gameRef.current = new TGameWin(ctx);
@@ -57,8 +57,22 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ isHumanOpponent }) => {
             return;
         }
 
+        // Convert modern key codes to legacy key codes for compatibility
+        let keyCode = 0;
+        switch (event.code) {
+            case 'KeyZ': keyCode = 90; break;
+            case 'KeyX': keyCode = 88; break;
+            case 'Space': keyCode = 32; break;
+            case 'Enter': keyCode = 13; break;
+            case 'ArrowLeft': keyCode = 37; break;
+            case 'ArrowRight': keyCode = 39; break;
+            case 'Numpad4': keyCode = 100; break;
+            case 'Numpad6': keyCode = 102; break;
+            default: return; // Ignore other keys
+        }
+
         // Handle key press
-        gameRef.current.checkKey(ctx, event.keyCode, isHumanOpponent);
+        gameRef.current.checkKey(ctx, keyCode, isHumanOpponent);
         
         // Redraw the game
         drawGame(ctx);

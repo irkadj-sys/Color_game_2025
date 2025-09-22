@@ -20,14 +20,18 @@ export abstract class TSide {
 
     // Concrete methods matching the original implementation
     bigRect(hDC: CanvasRenderingContext2D): void {
-        // Draw the big rectangle for color selection
-        const rectLeft = this.getRectColLeft() - GAME_CONSTANTS.RECT_S / 4;
-        const rectTop = this.getRectColTop() - GAME_CONSTANTS.RECT_S / 4;
-        const rectRight = this.getRectColRight() + GAME_CONSTANTS.RECT_S / 4;
-        const rectBottom = this.getRectColBottom() + GAME_CONSTANTS.RECT_S / 4;
+        // Draw the big rectangle around the currently selected color
+        const selectedColorX = this.getRectColLeft() + this.sColor * 16;
+        const selectedColorY = this.getRectColTop();
+        const colorSize = 8; // RECT_S/2
+        
+        const rectLeft = selectedColorX - GAME_CONSTANTS.RECT_S / 4;
+        const rectTop = selectedColorY - GAME_CONSTANTS.RECT_S / 4;
+        const rectRight = selectedColorX + colorSize + GAME_CONSTANTS.RECT_S / 4;
+        const rectBottom = selectedColorY + colorSize + GAME_CONSTANTS.RECT_S / 4;
 
         hDC.strokeStyle = 'rgb(255,255,255)';
-        hDC.lineWidth = 1;
+        hDC.lineWidth = 2;
         hDC.strokeRect(rectLeft, rectTop, rectRight - rectLeft, rectBottom - rectTop);
     }
 
@@ -46,15 +50,6 @@ export abstract class TSide {
     }
 
     change(hDC: CanvasRenderingContext2D, delta: number): void {
-        // Clear the old selection rectangle
-        hDC.fillStyle = 'rgb(0,0,0)';
-        hDC.fillRect(
-            this.getRectColLeft() + this.sColor * 16,
-            this.getRectColTop(),
-            8, // RECT_S/2
-            8  // RECT_S/2
-        );
-
         // Update color selection
         this.sColor += delta;
         if (this.sColor === GAME_CONSTANTS.NUMBER_COLORS) {
@@ -62,16 +57,9 @@ export abstract class TSide {
         } else if (this.sColor === -1) {
             this.sColor = GAME_CONSTANTS.NUMBER_COLORS - 1;
         }
-
-        // Draw the new selection rectangle
-        const color = COLORS[this.sColor][1];
-        hDC.fillStyle = `rgb(${color[0]},${color[1]},${color[2]})`;
-        hDC.fillRect(
-            this.getRectColLeft() + this.sColor * 16,
-            this.getRectColTop(),
-            8, // RECT_S/2
-            8  // RECT_S/2
-        );
+        
+        // Redraw the large selection rectangle for the new color
+        this.bigRect(hDC);
     }
 
     drawRomb(hDC: CanvasRenderingContext2D, i: number, j: number, color: number): void {

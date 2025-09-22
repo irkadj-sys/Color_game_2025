@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Colors Game 1995 - Web Port</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background-color: #282c34;
+            color: white;
+            text-align: center;
+        }
+
+        .App-header {
+            padding: 20px;
+        }
+
+        .App-header h1 {
+            margin: 0 0 20px 0;
+            color: #61dafb;
+        }
+
+        main {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        label {
+            margin: 0 10px;
+            cursor: pointer;
+        }
+
+        input[type="radio"] {
+            margin-right: 5px;
+        }
+
+        button {
+            background-color: #61dafb;
+            border: none;
+            color: #282c34;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        button:hover {
+            background-color: #4fa8c5;
+        }
+
+        .game-container {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .game-info {
+            margin-bottom: 10px;
+        }
+
+        .game-controls {
+            margin-top: 10px;
+            color: white;
+            font-size: 12px;
+        }
+
+        canvas {
+            border: 1px solid #333;
+            background-color: black;
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="App">
+        <header class="App-header">
+            <h1>Colors Game 1995</h1>
+            <div style="margin-bottom: 20px;">
+                <label>
+                    <input type="radio" name="opponent" id="human" checked>
+                    Human
+                </label>
+                <label style="margin-left: 20px;">
+                    <input type="radio" name="opponent" id="computer">
+                    Computer
+                </label>
+            </div>
+        </header>
+        <main>
+            <div class="game-container">
+                <div class="game-info">
+                    <button id="newGameBtn">New Game</button>
+                    <span id="gameState">Game State: gsGameL</span>
+                </div>
+                <canvas id="gameCanvas" width="580" height="390" tabindex="0"></canvas>
+                <div class="game-controls">
+                    <p>Left Player: Z/X to change color, Space to confirm</p>
+                    <p>Right Player: Arrow keys to change color, Enter to confirm</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Game constants matching the original C++ code exactly
+        const GAME_CONSTANTS = {
+            // Board dimensions
+            W: 89,  // Board width
+            H: 25,  // Board height
+            
+            // Player codes
+            DL: 64,  // Left player code
+            DR: 128, // Right player code
+            
+            // Colors
+            NUMBER_COLORS: 5,
+            
+            // Window dimensions (from original)
+            WIDTH: 580,
+            HEIGHT: 390,
+            RECT_S: 16,
+            
+            // Game states
+            GAME_STATES: {
+                GAME_OVER: 'gsGameOver',
+                GAME_L: 'gsGameL',
+                GAME_R: 'gsGameR'
+            }
+        };
+
+        // Color definitions matching the original C++ Color array
+        const COLORS = [
+            // Blue colors
+            [
+                [0, 65, 246],   // 4
+                [0, 98, 255],   // 5
+                [0, 164, 255],  // 9
+                [0, 0, 255]     // 0, 32, 255
+            ],
+            // Green colors
+            [
+                [0, 164, 0],    // 7
+                [32, 197, 65],  // 11
+                [32, 255, 65],  //
+                [0, 131, 0]     //
+            ],
+            // Red colors
+            [
+                [197, 0, 0],    //
+                [255, 32, 0],   // 6
+                [255, 131, 131],//
+                [197, 0, 0]     //
+            ],
+            // Yellow colors
+            [
+                [255, 160, 0],  //
+                [255, 197, 0],  //
+                [255, 255, 102],//
+                [197, 131, 0]   //
+            ],
+            // Violet colors
+            [
+                [255, 131, 255],//
+                [197, 96, 255], //
+                [255, 131, 255],//
+                [197, 96, 255]  //
+            ]
+        ];
+
+        // Romb (diamond) pattern matching the original C++ Romb array
+        const ROMB_PATTERN = [
+            0,0,0,0,1,1,0,0,0,0,
+            0,0,0,1,3,2,1,0,0,0,
+            0,0,1,3,3,2,2,1,0,0,
+            0,1,3,3,3,2,2,2,1,0,
+            1,3,3,3,3,2,2,2,2,1,
+            1,2,2,2,2,4,4,4,4,1,
+            0,1,2,2,2,4,4,4,1,0,
+            0,0,1,2,2,4,4,1,0,0,
+            0,0,0,1,2,4,1,0,0,0,
+            0,0,0,0,1,1,0,0,0,0
+        ];
+
+        // TBoard class
+        class TBoard {
+            constructor(Ht, Wt) {
+                this.bHt = Ht;
+                this.bWt = Wt;
+                this.board = [];
+
+                // Initialize board matching the original C++ logic
+                for (let i = 0; i < Ht; i++) {
+                    this.board[i] = [];
+                    for (let j = 0; j < Wt; j++) {
+                        // Match the original logic: 5.0 * rand() / RAND_MAX + 1
+                        this.board[i][j] = Math.floor(5.0 * Math.random()) + 1;
+                        if (i === Ht - 1 && j % 2) {
+                            this.board[i][j] = 0;
+                        }
+                    }
+                }
+            }
+
+            getCell(i, j) {
+                return this.board[i][j];
+            }
+
+            setCell(i, j, playerCD) {
+                this.board[i][j] += playerCD;
+                return this.board[i][j];
+            }
+
+            resetCell(i, j, cell) {
+                this.board[i][j] = cell;
+                return this.board[i][j];
+            }
+
+            getH() {
+                return this.bHt;
+            }
+
+            getW() {
+                return this.bWt;
+            }
+        }
+
+        // TSide base class
+        class TSide {
+            constructor(game, playerCode) {
+                this.hGame = game;
+                this.playerCode = playerCode;
+                this.sColor = 0;
+                this.fieldColor = 0;
+                this.score = 0;
+            }
+
+            // Abstract methods that must be implemented by subclasses
+            check(hDC, forbid) { throw new Error('Must be implemented'); }
+            printScore(hDC) { throw new Error('Must be implemented'); }
+            animation(hDC) { throw new Error('Must be implemented'); }
+
+            bigRect(hDC) {
+                // Draw the big rectangle for color selection around the currently selected color
+                const rectLeft = this.getRectColLeft() + this.sColor * 16 - GAME_CONSTANTS.RECT_S / 4;
+                const rectTop = this.getRectColTop() - GAME_CONSTANTS.RECT_S / 4;
+                const rectRight = this.getRectColLeft() + this.sColor * 16 + 8 + GAME_CONSTANTS.RECT_S / 4;
+                const rectBottom = this.getRectColTop() + 8 + GAME_CONSTANTS.RECT_S / 4;
+
+                hDC.strokeStyle = 'rgb(255,255,255)';
+                hDC.lineWidth = 1;
+                hDC.strokeRect(rectLeft, rectTop, rectRight - rectLeft, rectBottom - rectTop);
+            }
+
+            panel(hDC) {
+                // Clear the color selection panel area first to prevent overlapping
+                hDC.fillStyle = 'rgb(0,0,0)';
+                hDC.fillRect(
+                    this.getRectColLeft(),
+                    this.getRectColTop(),
+                    GAME_CONSTANTS.NUMBER_COLORS * 16,
+                    8
+                );
+                
+                // Draw the color selection panel
+                for (let i = 0; i < GAME_CONSTANTS.NUMBER_COLORS; i++) {
+                    const color = COLORS[i][1];
+                    
+                    // Check if this color is disabled (opponent's color or current side's color)
+                    const opponentColor = this.getOpponentColor();
+                    const currentSideColor = this.fieldColor;
+                    const isDisabled = (i === opponentColor - 1 || i === currentSideColor - 1);
+                    
+                    if (isDisabled) {
+                        // Draw disabled color in gray
+                        hDC.fillStyle = 'rgb(64,64,64)';
+                    } else {
+                        // Draw normal color
+                        hDC.fillStyle = `rgb(${color[0]},${color[1]},${color[2]})`;
+                    }
+                    
+                    hDC.fillRect(
+                        this.getRectColLeft() + i * 16,
+                        this.getRectColTop(),
+                        8, // RECT_S/2
+                        8  // RECT_S/2
+                    );
+                }
+            }
+
+            change(hDC, delta) {
+                // Debug: log the change operation
+                console.log('Change called with delta:', delta, 'Current sColor:', this.sColor);
+                
+                // Clear the old selection rectangle
+                hDC.fillStyle = 'rgb(0,0,0)';
+                hDC.fillRect(
+                    this.getRectColLeft() + this.sColor * 16,
+                    this.getRectColTop(),
+                    8, // RECT_S/2
+                    8  // RECT_S/2
+                );
+
+                // Get the opponent's current color to skip it
+                const opponentColor = this.getOpponentColor();
+                const currentSideColor = this.fieldColor;
+
+                // Find the next valid color, skipping unavailable ones
+                let attempts = 0;
+                let newColor = this.sColor;
+                
+                do {
+                    newColor += delta;
+                    if (newColor >= GAME_CONSTANTS.NUMBER_COLORS) {
+                        newColor = 0;
+                    } else if (newColor < 0) {
+                        newColor = GAME_CONSTANTS.NUMBER_COLORS - 1;
+                    }
+                    attempts++;
+                } while (
+                    attempts < GAME_CONSTANTS.NUMBER_COLORS && 
+                    (newColor === opponentColor - 1 || newColor === currentSideColor - 1)
+                );
+
+                // Update color selection
+                this.sColor = newColor;
+
+                // Debug: log the new color selection
+                console.log('New sColor:', this.sColor, 'Position:', this.getRectColLeft() + this.sColor * 16, this.getRectColTop());
+
+                // Draw the new selection rectangle
+                const color = COLORS[this.sColor][1];
+                hDC.fillStyle = `rgb(${color[0]},${color[1]},${color[2]})`;
+                hDC.fillRect(
+                    this.getRectColLeft() + this.sColor * 16,
+                    this.getRectColTop(),
+                    8, // RECT_S/2
+                    8  // RECT_S/2
+                );
+            }
+
+            // Helper method to get opponent's current color
+            getOpponentColor() {
+                // This will be implemented in subclasses
+                return 0;
+            }
+
+            drawRomb(hDC, i, j, color) {
+                // Match the original positioning logic exactly
+                const x = 20 + 6 * ((j % 2) + i * 2);
+                const y = 20 + j * 6;
+
+                // Draw the romb pattern
+                for (let dx = 0; dx < 10; dx++) {
+                    for (let dy = 0; dy < 10; dy++) {
+                        const patternIndex = dx * 10 + dy;
+                        const patternValue = ROMB_PATTERN[patternIndex];
+                        
+                        if (patternValue > 0) {
+                            const colorIndex = patternValue - 1;
+                            const rgb = COLORS[color][colorIndex];
+                            hDC.fillStyle = `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
+                            hDC.fillRect(y + dy, x + dx, 1, 1);
+                        }
+                    }
+                }
+            }
+
+            paintField(hDC) {
+                const H = this.hGame.getH();
+                const W = this.hGame.getW();
+                
+                for (let i = 0; i < H; i++) {
+                    for (let j = 0; j < W; j++) {
+                        const color = this.hGame.getCell(i, j);
+                        if (color) {
+                            this.drawRomb(hDC, i, j, (color & 63) - 1);
+                        }
+                    }
+                }
+            }
+
+            nowColor() {
+                return this.fieldColor;
+            }
+
+            // Abstract positioning methods
+            getRectColLeft() { return 0; }
+            getRectColTop() { return 0; }
+            getRectColRight() { return 0; }
+            getRectColBottom() { return 0; }
+        }
+
+        // TLeft class
+        class TLeft extends TSide {
+            constructor(hDC, game) {
+                super(game, GAME_CONSTANTS.DL);
+                
+                // Initialize position matching the original
+                this.sColor = this.hGame.getCell(this.hGame.getH() - 1, 0) - 1;
+                this.hGame.setCell(this.hGame.getH() - 1, 0, this.playerCode);
+                this.score = 1;
+                this.check(hDC, 0);
+                this.sColor = 0;
+                this.change(hDC, 0);
+            }
+
+            check(hDC, forbid) {
+                let i, j, ii;
+                let backi, backj;
+
+                if (this.sColor !== this.fieldColor - 1 && this.sColor !== forbid - 1) {
+                    this.fieldColor = this.sColor + 1;
+                    // Update the tracked field color for the opponent to skip
+                    this.hGame.leftPlayerFieldColor = this.fieldColor;
+                } else {
+                    return 0;
+                }
+
+                i = this.hGame.getH() - 1;
+                while (i >= 0) {
+                    backi = false;
+                    j = 0;
+                    while (j < this.hGame.getW()) {
+                        backj = false;
+                        ii = i - 1 + (2 * (j % 2));
+                        
+                        if (this.hGame.getCell(i, j) & this.playerCode) {
+                            this.drawRomb(hDC, i, j, this.fieldColor - 1);
+                            
+                            if (ii >= 0 && ii < this.hGame.getH()) {
+                                if (j + 1 < this.hGame.getW()) {
+                                    if (this.hGame.getCell(ii, j + 1) === this.fieldColor) {
+                                        this.hGame.setCell(ii, j + 1, this.playerCode);
+                                        this.score++;
+                                        if (ii > i) backi = true;
+                                    }
+                                }
+                                if (j - 1 >= 0) {
+                                    if (this.hGame.getCell(ii, j - 1) === this.fieldColor) {
+                                        this.hGame.setCell(ii, j - 1, this.playerCode);
+                                        this.score++;
+                                        backj = true;
+                                        if (ii > i) backi = true;
+                                    }
+                                }
+                            }
+                            
+                            if (j + 1 < this.hGame.getW()) {
+                                if (this.hGame.getCell(i, j + 1) === this.fieldColor) {
+                                    this.hGame.setCell(i, j + 1, this.playerCode);
+                                    this.score++;
+                                }
+                            }
+                            if (j - 1 >= 0) {
+                                if (this.hGame.getCell(i, j - 1) === this.fieldColor) {
+                                    this.hGame.setCell(i, j - 1, this.playerCode);
+                                    this.score++;
+                                    backj = true;
+                                }
+                            }
+                            
+                            this.hGame.resetCell(i, j, this.playerCode + this.fieldColor);
+                        }
+                        
+                        if (!backj) j++;
+                        else if (j) j--;
+                    }
+                    if (!backi) i--;
+                    else if (i < this.hGame.getH() - 1) i++;
+                }
+
+                this.printScore(hDC);
+                
+                if (this.score > (this.hGame.getW() * this.hGame.getH() - this.hGame.getW() / 2) / 2) {
+                    this.animation(hDC);
+                    return -1;
+                } else {
+                    return 1;
+                }
+            }
+
+            printScore(hDC) {
+                hDC.fillStyle = 'rgb(255,255,255)';
+                hDC.font = '16px Arial';
+                const scoreText = `${this.score}    `;
+                hDC.fillText(scoreText, GAME_CONSTANTS.WIDTH / 4 - GAME_CONSTANTS.RECT_S, GAME_CONSTANTS.HEIGHT - 70);
+            }
+
+            animation(hDC) {
+                // Implementation for win animation
+            }
+
+            getRectColLeft() {
+                return GAME_CONSTANTS.WIDTH / 4 - GAME_CONSTANTS.RECT_S * 2;
+            }
+
+            getRectColTop() {
+                return GAME_CONSTANTS.HEIGHT - 70;
+            }
+
+            getRectColRight() {
+                return this.getRectColLeft() + GAME_CONSTANTS.RECT_S / 2;
+            }
+
+            getRectColBottom() {
+                return this.getRectColTop() + GAME_CONSTANTS.RECT_S / 2;
+            }
+
+            // Helper method to get opponent's current color
+            getOpponentColor() {
+                // Get the right player's current field color
+                // We need to access the right player's fieldColor through the game
+                // For now, we'll use a simpler approach - get it from the game state
+                return this.hGame.rightPlayerFieldColor || 0;
+            }
+        }
+
+        // TRight class
+        class TRight extends TSide {
+            constructor(hDC, game) {
+                super(game, GAME_CONSTANTS.DR);
+                
+                // Initialize position matching the original
+                this.sColor = this.hGame.getCell(0, this.hGame.getW() - 1) - 1;
+                this.hGame.setCell(0, this.hGame.getW() - 1, this.playerCode);
+                this.score = 1;
+                this.check(hDC, 0);
+                this.sColor = 0;
+                this.change(hDC, 0);
+            }
+
+            check(hDC, forbid) {
+                let i, j, ii;
+                let backi, backj;
+
+                if (this.sColor !== this.fieldColor - 1 && this.sColor !== forbid - 1) {
+                    this.fieldColor = this.sColor + 1;
+                    // Update the tracked field color for the opponent to skip
+                    this.hGame.rightPlayerFieldColor = this.fieldColor;
+                } else {
+                    return 0;
+                }
+
+                i = 0;
+                while (i < this.hGame.getH()) {
+                    backi = false;
+                    j = this.hGame.getW() - 1;
+                    while (j >= 0) {
+                        backj = false;
+                        ii = i - 1 + (2 * (j % 2));
+                        
+                        if (this.hGame.getCell(i, j) & this.playerCode) {
+                            this.drawRomb(hDC, i, j, this.fieldColor - 1);
+                            
+                            if (ii >= 0 && ii < this.hGame.getH()) {
+                                if (j + 1 < this.hGame.getW()) {
+                                    if (this.hGame.getCell(ii, j + 1) === this.fieldColor) {
+                                        this.hGame.setCell(ii, j + 1, this.playerCode);
+                                        this.score++;
+                                        if (ii < i) backi = true;
+                                        backj = true;
+                                    }
+                                }
+                                if (j - 1 >= 0) {
+                                    if (this.hGame.getCell(ii, j - 1) === this.fieldColor) {
+                                        this.hGame.setCell(ii, j - 1, this.playerCode);
+                                        this.score++;
+                                        if (ii < i) backi = true;
+                                    }
+                                }
+                            }
+                            
+                            if (j + 1 < this.hGame.getW()) {
+                                if (this.hGame.getCell(i, j + 1) === this.fieldColor) {
+                                    this.hGame.setCell(i, j + 1, this.playerCode);
+                                    this.score++;
+                                    backj = true;
+                                }
+                            }
+                            if (j - 1 >= 0) {
+                                if (this.hGame.getCell(i, j - 1) === this.fieldColor) {
+                                    this.hGame.setCell(i, j - 1, this.playerCode);
+                                    this.score++;
+                                }
+                            }
+                            
+                            this.hGame.resetCell(i, j, this.playerCode + this.fieldColor);
+                        }
+                        
+                        if (!backj) j--;
+                        else if (j < this.hGame.getW() - 2) j++;
+                    }
+                    if (!backi) i++;
+                    else if (i) i--;
+                }
+
+                this.printScore(hDC);
+                
+                if (this.score > (this.hGame.getW() * this.hGame.getH() - this.hGame.getW() / 2) / 2) {
+                    this.animation(hDC);
+                    return -1;
+                } else {
+                    return 1;
+                }
+            }
+
+            printScore(hDC) {
+                hDC.fillStyle = 'rgb(255,255,255)';
+                hDC.font = '16px Arial';
+                const scoreText = `${this.score}    `;
+                hDC.fillText(scoreText, 3 * GAME_CONSTANTS.WIDTH / 4 - GAME_CONSTANTS.RECT_S, GAME_CONSTANTS.HEIGHT - 70);
+            }
+
+            selectColor(hDC, forbid) {
+                // AI color selection logic
+                this.sColor = Math.floor(Math.random() * GAME_CONSTANTS.NUMBER_COLORS);
+                while (this.sColor === forbid - 1) {
+                    this.sColor = Math.floor(Math.random() * GAME_CONSTANTS.NUMBER_COLORS);
+                }
+            }
+
+            animation(hDC) {
+                // Implementation for win animation
+            }
+
+            getRectColLeft() {
+                return 3 * GAME_CONSTANTS.WIDTH / 4 - GAME_CONSTANTS.RECT_S * 2;
+            }
+
+            getRectColTop() {
+                return GAME_CONSTANTS.HEIGHT - 70;
+            }
+
+            getRectColRight() {
+                return this.getRectColLeft() + GAME_CONSTANTS.RECT_S / 2;
+            }
+
+            getRectColBottom() {
+                return this.getRectColTop() + GAME_CONSTANTS.RECT_S / 2;
+            }
+
+            // Helper method to get opponent's current color
+            getOpponentColor() {
+                // Get the left player's current field color
+                // We need to access the left player's fieldColor through the game
+                // For now, we'll use a simpler approach - get it from the game state
+                return this.hGame.leftPlayerFieldColor || 0;
+            }
+        }
+
+        // TGameWin class
+        class TGameWin {
+            constructor(hDC) {
+                this.game = new TBoard(25, 89);
+                this.left = new TLeft(hDC, this.game);
+                this.right = new TRight(hDC, this.game);
+                this.gameState = 'gsGameL';
+                
+                // Track players' current field colors for color skipping logic
+                this.game.leftPlayerFieldColor = this.left.fieldColor;
+                this.game.rightPlayerFieldColor = this.right.fieldColor;
+            }
+
+            drawField(hDC) {
+                // Draw the game field first (background)
+                this.left.paintField(hDC);
+                
+                // Draw the color selection panels on top
+                this.left.panel(hDC);
+                this.right.panel(hDC);
+                
+                if (this.gameState !== 'gsGameOver') {
+                    this.left.bigRect(hDC);
+                    this.right.bigRect(hDC);
+                }
+                
+                this.left.printScore(hDC);
+                this.right.printScore(hDC);
+            }
+
+            checkKey(hDC, key, human) {
+                let s;
+
+                if (this.gameState === 'gsGameR') {
+                    // Right player turn
+                    switch (key) {
+                        case 37: // VK_LEFT
+                        case 100: // VK_NUMPAD4
+                            this.right.change(hDC, -1); // Left arrow should go to previous color (left)
+                            break;
+                        case 39: // VK_RIGHT
+                        case 102: // VK_NUMPAD6
+                            this.right.change(hDC, 1); // Right arrow should go to next color (right)
+                            break;
+                        case 13: // 0x0D (Enter)
+                            s = this.right.check(hDC, this.left.nowColor());
+                            if (s === -1) {
+                                this.gameState = 'gsGameOver';
+                            } else if (s === 0) {
+                                return;
+                            } else {
+                                this.gameState = 'gsGameL';
+                            }
+                            break;
+                        default:
+                            return;
+                    }
+                } else if (this.gameState === 'gsGameL') {
+                    // Left player turn
+                    switch (key) {
+                        case 90: // 0x5A (Z)
+                            this.left.change(hDC, -1); // Z should go to previous color (left)
+                            break;
+                        case 88: // 0x58 (X)
+                            this.left.change(hDC, 1); // X should go to next color (right)
+                            break;
+                        case 32: // 0x20 (Space)
+                            s = this.left.check(hDC, this.right.nowColor());
+                            if (s === -1) {
+                                this.gameState = 'gsGameOver';
+                            } else if (s === 0) {
+                                return;
+                            } else if (human) {
+                                this.gameState = 'gsGameR';
+                            } else {
+                                // Computer opponent logic
+                                let a = 0;
+                                while (!a) {
+                                    this.right.selectColor(hDC, this.left.nowColor());
+                                    a = this.right.check(hDC, this.left.nowColor());
+                                }
+                            }
+                            break;
+                    }
+                }
+            }
+
+            getGameState() {
+                return this.gameState;
+            }
+
+            reset(hDC) {
+                this.game = new TBoard(25, 89);
+                this.left = new TLeft(hDC, this.game);
+                this.right = new TRight(hDC, this.game);
+                this.gameState = 'gsGameL';
+                
+                // Reset player field colors
+                this.game.leftPlayerFieldColor = this.left.fieldColor;
+                this.game.rightPlayerFieldColor = this.right.fieldColor;
+            }
+        }
+
+        // Game initialization and management
+        let game = null;
+        let canvas = null;
+        let ctx = null;
+
+        function initGame() {
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+            
+            // Set canvas size to match original dimensions exactly
+            canvas.width = GAME_CONSTANTS.WIDTH;
+            canvas.height = GAME_CONSTANTS.HEIGHT;
+
+            // Initialize game
+            game = new TGameWin(ctx);
+            
+            // Draw initial state
+            drawGame();
+            
+            // Focus the canvas for keyboard input
+            canvas.focus();
+            
+            // Ensure canvas stays focused
+            canvas.setAttribute('tabindex', '0');
+        }
+
+        function drawGame() {
+            if (!game || !ctx) return;
+
+            // Clear canvas
+            ctx.fillStyle = 'rgb(0,0,0)';
+            ctx.fillRect(0, 0, GAME_CONSTANTS.WIDTH, GAME_CONSTANTS.HEIGHT);
+
+            // Draw game field
+            game.drawField(ctx);
+            
+            // Update game state display
+            document.getElementById('gameState').textContent = `Game State: ${game.getGameState()}`;
+        }
+
+        function handleKeyDown(event) {
+            if (!game || !ctx) return;
+
+            // Check if the game is over
+            if (game.getGameState() === 'gsGameOver') {
+                return;
+            }
+
+            // Get opponent type
+            const isHumanOpponent = document.getElementById('human').checked;
+
+            // Handle key press - use both keyCode and code for compatibility
+            const keyCode = event.keyCode || event.which;
+            const key = event.key || event.code;
+            
+            // Convert key to keyCode if needed
+            let finalKeyCode = keyCode;
+            if (!finalKeyCode) {
+                switch (key.toLowerCase()) {
+                    case 'z': finalKeyCode = 90; break;
+                    case 'x': finalKeyCode = 88; break;
+                    case ' ': finalKeyCode = 32; break;
+                    case 'enter': finalKeyCode = 13; break;
+                    case 'arrowleft': finalKeyCode = 37; break;
+                    case 'arrowright': finalKeyCode = 39; break;
+                    default: return;
+                }
+            }
+
+            // Debug: log the key being pressed
+            console.log('Key pressed:', key, 'KeyCode:', finalKeyCode);
+
+            // Handle key press
+            game.checkKey(ctx, finalKeyCode, isHumanOpponent);
+            
+            // Redraw the game
+            drawGame();
+        }
+
+        function handleNewGame() {
+            if (!game || !ctx) return;
+
+            game.reset(ctx);
+            drawGame();
+            
+            // Focus the canvas again after new game
+            canvas.focus();
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            initGame();
+            
+            // Add keyboard event listener to the document
+            document.addEventListener('keydown', handleKeyDown);
+            
+            // Also add keyboard event listener to the canvas
+            canvas.addEventListener('keydown', handleKeyDown);
+            
+            // Add click handler to focus canvas when clicked
+            canvas.addEventListener('click', function() {
+                canvas.focus();
+            });
+            
+            // Add new game button listener
+            document.getElementById('newGameBtn').addEventListener('click', handleNewGame);
+            
+            // Add opponent type change listeners
+            document.getElementById('human').addEventListener('change', function() {
+                if (game && ctx) {
+                    drawGame();
+                }
+            });
+            
+            document.getElementById('computer').addEventListener('change', function() {
+                if (game && ctx) {
+                    drawGame();
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

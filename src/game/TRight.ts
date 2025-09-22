@@ -92,7 +92,7 @@ export class TRight extends TSide {
         hDC.fillStyle = 'rgb(255,255,255)';
         hDC.font = '16px Arial';
         const scoreText = `${this.score}    `;
-        hDC.fillText(scoreText, 3 * GAME_CONSTANTS.WIDTH / 4 - GAME_CONSTANTS.RECT_S, GAME_CONSTANTS.HEIGHT - 70);
+        hDC.fillText(scoreText, 3 * GAME_CONSTANTS.WIDTH / 4 - GAME_CONSTANTS.RECT_S, GAME_CONSTANTS.HEIGHT + 50);
     }
 
     selectColor(hDC: CanvasRenderingContext2D, forbid: number): void {
@@ -115,7 +115,7 @@ export class TRight extends TSide {
     }
 
     protected getRectColTop(): number {
-        return GAME_CONSTANTS.HEIGHT - 93;
+        return GAME_CONSTANTS.HEIGHT + 20; // Position in the extra space we added
     }
 
     protected getRectColRight(): number {
