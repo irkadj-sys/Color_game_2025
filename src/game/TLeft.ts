@@ -11,7 +11,7 @@ export class TLeft extends TSide {
         this.hGame.setCell(this.hGame.getH() - 1, 0, this.playerCode);
         this.score = 1;
         this.check(hDC, 0);
-        this.sColor = 0;
+        this.sColor = 0; // Left player starts with color 0
         this.change(hDC, 0);
     }
 
@@ -98,22 +98,5 @@ export class TLeft extends TSide {
     animation(hDC: CanvasRenderingContext2D): void {
         // Implementation for win animation
         // This would match the original animation logic
-    }
-
-    // Override positioning methods for left side
-    protected getRectColLeft(): number {
-        return GAME_CONSTANTS.WIDTH / 4 - GAME_CONSTANTS.RECT_S * 2;
-    }
-
-    protected getRectColTop(): number {
-        return GAME_CONSTANTS.HEIGHT + 20; // Position in the extra space we added
-    }
-
-    protected getRectColRight(): number {
-        return this.getRectColLeft() + GAME_CONSTANTS.RECT_S / 2;
-    }
-
-    protected getRectColBottom(): number {
-        return this.getRectColTop() + GAME_CONSTANTS.RECT_S / 2;
     }
 } 

@@ -11,7 +11,7 @@ export class TRight extends TSide {
         this.hGame.setCell(0, this.hGame.getW() - 1, this.playerCode);
         this.score = 1;
         this.check(hDC, 0);
-        this.sColor = 0;
+        this.sColor = 1; // Right player starts with color 1
         this.change(hDC, 0);
     }
 
@@ -107,22 +107,5 @@ export class TRight extends TSide {
     animation(hDC: CanvasRenderingContext2D): void {
         // Implementation for win animation
         // This would match the original animation logic
-    }
-
-    // Override positioning methods for right side
-    protected getRectColLeft(): number {
-        return 3 * GAME_CONSTANTS.WIDTH / 4 - GAME_CONSTANTS.RECT_S * 2;
-    }
-
-    protected getRectColTop(): number {
-        return GAME_CONSTANTS.HEIGHT + 20; // Position in the extra space we added
-    }
-
-    protected getRectColRight(): number {
-        return this.getRectColLeft() + GAME_CONSTANTS.RECT_S / 2;
-    }
-
-    protected getRectColBottom(): number {
-        return this.getRectColTop() + GAME_CONSTANTS.RECT_S / 2;
     }
 } 

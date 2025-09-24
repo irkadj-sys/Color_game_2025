@@ -18,37 +18,6 @@ export abstract class TSide {
     abstract printScore(hDC: CanvasRenderingContext2D): void;
     abstract animation(hDC: CanvasRenderingContext2D): void;
 
-    // Concrete methods matching the original implementation
-    bigRect(hDC: CanvasRenderingContext2D): void {
-        // Draw the big rectangle around the currently selected color
-        const selectedColorX = this.getRectColLeft() + this.sColor * 16;
-        const selectedColorY = this.getRectColTop();
-        const colorSize = 8; // RECT_S/2
-        
-        const rectLeft = selectedColorX - GAME_CONSTANTS.RECT_S / 4;
-        const rectTop = selectedColorY - GAME_CONSTANTS.RECT_S / 4;
-        const rectRight = selectedColorX + colorSize + GAME_CONSTANTS.RECT_S / 4;
-        const rectBottom = selectedColorY + colorSize + GAME_CONSTANTS.RECT_S / 4;
-
-        hDC.strokeStyle = 'rgb(255,255,255)';
-        hDC.lineWidth = 2;
-        hDC.strokeRect(rectLeft, rectTop, rectRight - rectLeft, rectBottom - rectTop);
-    }
-
-    panel(hDC: CanvasRenderingContext2D): void {
-        // Draw the color selection panel
-        for (let i = 0; i < GAME_CONSTANTS.NUMBER_COLORS; i++) {
-            const color = COLORS[i][1];
-            hDC.fillStyle = `rgb(${color[0]},${color[1]},${color[2]})`;
-            hDC.fillRect(
-                this.getRectColLeft() + i * 16,
-                this.getRectColTop(),
-                8, // RECT_S/2
-                8  // RECT_S/2
-            );
-        }
-    }
-
     change(hDC: CanvasRenderingContext2D, delta: number): void {
         // Update color selection
         this.sColor += delta;
@@ -57,9 +26,6 @@ export abstract class TSide {
         } else if (this.sColor === -1) {
             this.sColor = GAME_CONSTANTS.NUMBER_COLORS - 1;
         }
-        
-        // Redraw the large selection rectangle for the new color
-        this.bigRect(hDC);
     }
 
     drawRomb(hDC: CanvasRenderingContext2D, i: number, j: number, color: number): void {
@@ -101,9 +67,17 @@ export abstract class TSide {
         return this.fieldColor;
     }
 
-    // Abstract positioning methods that must be implemented by subclasses
-    protected abstract getRectColLeft(): number;
-    protected abstract getRectColTop(): number;
-    protected abstract getRectColRight(): number;
-    protected abstract getRectColBottom(): number;
+    // Public getter/setter for sColor
+    getSColor(): number {
+        return this.sColor;
+    }
+
+    setSColor(colorIndex: number): void {
+        this.sColor = colorIndex;
+    }
+
+    // Public getter for score
+    getScore(): number {
+        return this.score;
+    }
 } 

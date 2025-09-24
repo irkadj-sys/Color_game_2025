@@ -2,6 +2,7 @@
   "name": "colors-game-1995",
   "version": "1.0.0",
   "description": "Web port of Colors Game 1995",
+  "homepage": "https://irina-djalalov.github.io/Colors_Game_1995",
   "private": true,
   "dependencies": {
     "@types/node": "^16.18.0",
@@ -17,7 +18,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [

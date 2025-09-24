@@ -20,20 +20,14 @@ export class TGameWin {
     }
 
     drawField(hDC: CanvasRenderingContext2D): void {
-        this.left.panel(hDC);
-        this.right.panel(hDC);
         this.left.paintField(hDC);
-        
-        if (this.gameState !== 'gsGameOver') {
-            this.left.bigRect(hDC);
-            this.right.bigRect(hDC);
-        }
         
         this.left.printScore(hDC);
         this.right.printScore(hDC);
     }
 
     checkKey(hDC: CanvasRenderingContext2D, key: number, human: boolean): void {
+        console.log('TGameWin.checkKey called with key:', key, 'human:', human, 'gameState:', this.gameState);
         let s: number;
 
         if (this.gameState === 'gsGameR') {
@@ -96,6 +90,46 @@ export class TGameWin {
 
     setGameState(state: GameState): void {
         this.gameState = state;
+    }
+
+    // Get available colors for the current player
+    getAvailableColors(): number[] {
+        // Get the colors that both players are currently selecting
+        const leftSelectedColor = this.left.getSColor();
+        const rightSelectedColor = this.right.getSColor();
+        
+        // Return all colors except the ones currently selected by both players
+        const allColors = [0, 1, 2, 3, 4];
+        return allColors.filter(color => color !== leftSelectedColor && color !== rightSelectedColor);
+    }
+
+    // Get current color selection for left player
+    getLeftPlayerColor(): number {
+        return this.left.getSColor();
+    }
+
+    // Get current color selection for right player  
+    getRightPlayerColor(): number {
+        return this.right.getSColor();
+    }
+
+    // Set color selection for left player
+    setLeftPlayerColor(colorIndex: number): void {
+        this.left.setSColor(colorIndex);
+    }
+
+    // Set color selection for right player
+    setRightPlayerColor(colorIndex: number): void {
+        this.right.setSColor(colorIndex);
+    }
+
+    // Get scores for both players
+    getLeftScore(): number {
+        return this.left.getScore();
+    }
+
+    getRightScore(): number {
+        return this.right.getScore();
     }
 
     // Method to reset the game
