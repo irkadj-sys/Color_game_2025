@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/Colors_Game_1995/static/css/main.5dcec474.css",
+    "main.js": "/Colors_Game_1995/static/js/main.77b831c1.js",
+    "index.html": "/Colors_Game_1995/index.html",
+    "main.5dcec474.css.map": "/Colors_Game_1995/static/css/main.5dcec474.css.map",
+    "main.77b831c1.js.map": "/Colors_Game_1995/static/js/main.77b831c1.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.5dcec474.css",
+    "static/js/main.77b831c1.js"
+  ]
+}
