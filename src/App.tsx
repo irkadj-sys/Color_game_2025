@@ -70,11 +70,11 @@ function App() {
 
     return (
         <div className="App" style={{ minHeight: '100vh', width: '100vw', display: 'flex', flexDirection: 'column', background: '#111' }}>
-            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px', background: '#222', color: '#fff', width: '100vw' }}>
-                <button onClick={() => setGameStarted(true)} style={{ fontSize: '1rem', padding: '8px 16px', borderRadius: '6px', background: '#4caf50', color: '#fff', border: 'none' }}>Game Start</button>
+            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 8px', background: '#222', color: '#fff', width: '100vw' }}>
+                <button onClick={() => setGameStarted(true)} style={{ fontSize: '0.7rem', padding: '4px 8px', borderRadius: '3px', background: '#4caf50', color: '#fff', border: 'none' }}>Game Start</button>
                 <button
                     onClick={() => setIsHumanOpponent(prev => !prev)}
-                    style={{ fontSize: '1rem', padding: '8px 16px', borderRadius: '6px', background: '#2196f3', color: '#fff', border: 'none' }}
+                    style={{ fontSize: '0.7rem', padding: '4px 8px', borderRadius: '3px', background: '#2196f3', color: '#fff', border: 'none' }}
                 >
                     Opponent: {isHumanOpponent ? 'Human' : 'Computer'}
                 </button>
@@ -91,16 +91,16 @@ function App() {
                         transform: 'translate(-50%, -50%)',
                         background: 'rgba(0, 0, 0, 0.9)',
                         color: '#fff',
-                        padding: '40px',
-                        borderRadius: '16px',
+                        padding: '20px',
+                        borderRadius: '8px',
                         textAlign: 'center',
                         zIndex: 2000,
-                        border: '2px solid #4caf50'
+                        border: '1px solid #4caf50'
                     }}>
-                        <h2 style={{ margin: '0 0 20px 0', fontSize: '2rem', color: '#4caf50' }}>
+                        <h2 style={{ margin: '0 0 10px 0', fontSize: '1.2rem', color: '#4caf50' }}>
                             Game Over!
                         </h2>
-                        <p style={{ margin: '0 0 20px 0', fontSize: '1.5rem' }}>
+                        <p style={{ margin: '0 0 10px 0', fontSize: '0.9rem' }}>
                             Winner: {winner}
                         </p>
                         <button
@@ -120,9 +120,9 @@ function App() {
                                 }
                             }}
                             style={{
-                                fontSize: '1rem',
-                                padding: '12px 24px',
-                                borderRadius: '8px',
+                                fontSize: '0.7rem',
+                                padding: '6px 12px',
+                                borderRadius: '4px',
                                 background: '#4caf50',
                                 color: '#fff',
                                 border: 'none',
@@ -134,7 +134,7 @@ function App() {
                     </div>
                 )}
                 
-                <div style={{ width: '100vw', background: '#222', color: '#fff', display: 'flex', justifyContent: 'space-around', alignItems: 'center', padding: '12px 0', marginTop: '2px', borderRadius: '0 0 16px 16px', position: 'relative', zIndex: 1000 }}>
+                <div style={{ width: '100vw', background: '#222', color: '#fff', display: 'flex', justifyContent: 'space-around', alignItems: 'center', padding: '6px 0', marginTop: '2px', borderRadius: '0 0 16px 16px', position: 'relative', zIndex: 1000 }}>
                     <PlayerColorSelector
                         player="left"
                         availableColors={availableColors}

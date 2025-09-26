@@ -16,15 +16,15 @@ const ColorSquare: React.FC<ColorSquareProps> = ({ colorIndex, isSelected, onCli
         <div
             onClick={disabled ? undefined : onClick}
             style={{
-                width: '40px',
-                height: '40px',
+                width: '20px',
+                height: '20px',
                 backgroundColor: rgb,
-                border: isSelected ? '3px solid #fff' : '2px solid #333',
-                borderRadius: '8px',
+                border: isSelected ? '2px solid #fff' : '1px solid #333',
+                borderRadius: '4px',
                 cursor: disabled ? 'not-allowed' : 'pointer',
                 opacity: disabled ? 0.5 : 1,
                 transition: 'all 0.2s ease',
-                boxShadow: isSelected ? '0 0 10px rgba(255,255,255,0.5)' : 'none'
+                boxShadow: isSelected ? '0 0 5px rgba(255,255,255,0.5)' : 'none'
             }}
         />
     );
@@ -50,11 +50,11 @@ export const PlayerColorSelector: React.FC<PlayerColorSelectorProps> = ({
             display: 'flex', 
             flexDirection: 'column', 
             alignItems: 'center', 
-            gap: '8px' 
+            gap: '4px' 
         }}>
             <div style={{ 
                 color: '#fff', 
-                fontSize: '0.9rem', 
+                fontSize: '0.7rem', 
                 fontWeight: 'bold',
                 textTransform: 'capitalize'
             }}>
@@ -63,7 +63,7 @@ export const PlayerColorSelector: React.FC<PlayerColorSelectorProps> = ({
             <div style={{ 
                 display: 'flex', 
                 flexDirection: 'row', 
-                gap: '8px',
+                gap: '4px',
                 justifyContent: 'center',
                 flexWrap: 'wrap'
             }}>
