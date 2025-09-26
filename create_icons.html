@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Icon Creator</title>
+</head>
+<body>
+    <canvas id="canvas" width="192" height="192" style="border: 1px solid #ccc;"></canvas>
+    <br>
+    <button onclick="downloadIcon()">Download Icon</button>
+    
+    <script>
+        function createIcon() {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Black background
+            ctx.fillStyle = '#111111';
+            ctx.fillRect(0, 0, 192, 192);
+            
+            // Draw 4 diamonds
+            const colors = ['#4caf50', '#f44336', '#ffeb3b', '#9c27b0'];
+            const positions = [
+                {x: 48, y: 48},   // top-left
+                {x: 112, y: 48},  // top-right
+                {x: 48, y: 128},  // bottom-left
+                {x: 112, y: 128}  // bottom-right
+            ];
+            
+            positions.forEach((pos, i) => {
+                ctx.fillStyle = colors[i];
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                
+                ctx.beginPath();
+                ctx.moveTo(pos.x, pos.y - 16);
+                ctx.lineTo(pos.x + 16, pos.y);
+                ctx.lineTo(pos.x, pos.y + 16);
+                ctx.lineTo(pos.x - 16, pos.y);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            });
+        }
+        
+        function downloadIcon() {
+            const canvas = document.getElementById('canvas');
+            const link = document.createElement('a');
+            link.download = 'icon-192.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+        
+        // Create icon on load
+        createIcon();
+    </script>
+</body>
+</html>

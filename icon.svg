@@ -1,0 +1,16 @@
+<svg width="192" height="192" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg">
+  <rect width="192" height="192" fill="#111111"/>
+  
+  <!-- 4 diamonds in different colors -->
+  <!-- Blue diamond (top-left) -->
+  <polygon points="48,48 64,32 80,48 64,64" fill="#4caf50" stroke="#ffffff" stroke-width="2"/>
+  
+  <!-- Red diamond (top-right) -->
+  <polygon points="112,48 128,32 144,48 128,64" fill="#f44336" stroke="#ffffff" stroke-width="2"/>
+  
+  <!-- Yellow diamond (bottom-left) -->
+  <polygon points="48,128 64,112 80,128 64,144" fill="#ffeb3b" stroke="#ffffff" stroke-width="2"/>
+  
+  <!-- Purple diamond (bottom-right) -->
+  <polygon points="112,128 128,112 144,128 128,144" fill="#9c27b0" stroke="#ffffff" stroke-width="2"/>
+</svg>
